@@ -113,10 +113,31 @@ app.get(["/post", "/post.html"], (req, res) => {
   res.sendFile(path.join(projectRoot, "post.html"));
 });
 
+const getDatabaseStatus = () => {
+  const states = ["disconnected", "connected", "connecting", "disconnecting"];
+  return states[mongoose.connection.readyState] || "unknown";
+};
+
 app.get("/api", (req, res) => {
   res.json({
     success: true,
     message: "Infozap API is running.",
+    endpoints: {
+      health: "/api/health",
+      posts: "/api/posts",
+    },
+  });
+});
+
+app.get("/api/health", (req, res) => {
+  res.json({
+    success: true,
+    service: "Infozap Backend API",
+    status: "operational",
+    uptimeSeconds: Math.round(process.uptime()),
+    database: getDatabaseStatus(),
+    stack: ["Node.js", "Express.js", "MongoDB"],
+    timestamp: new Date().toISOString(),
   });
 });
 
